@@ -4,11 +4,11 @@ LANG	: G++
 PROG	: CUDA_TEST
 ************************************************ */
 
-#include "cuda_test.h"
-
 #include <stdio.h>
-#include "cuda_runtime.h"
-#include "cuda.h"
+#include <cuda_runtime.h>
+#include <cuda.h>
+
+#include "cuda_test.h"
 
 void check_device()
 {
