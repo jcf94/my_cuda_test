@@ -11,6 +11,10 @@ PROG	: Main
 
 #include "matrix.h"
 
+#ifdef GPU_CUDA
+#include "cuda_test.h"
+#endif // GPU_CUDA
+
 using namespace std;
 
 #define LAX 1024
@@ -33,6 +37,10 @@ int main()
     matrix<int> c;
     c = a*b;
     c.display();
-    
+
+    #ifdef GPU_CUDA
+    check_device();
+    #endif // GPU_CUDA
+
     return 0;
 }
