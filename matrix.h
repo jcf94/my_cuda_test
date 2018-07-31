@@ -27,6 +27,14 @@ public:
     {
         return x*_x + y;
     }
+    inline int x()
+    {
+        return _x;
+    }
+    inline int y()
+    {
+        return _y;
+    }
     T* operator[](int x);
     const T* operator[](int x) const;
 
@@ -44,39 +52,5 @@ protected:
     int _x;
     int _y;
 };
-
-#ifdef GPU_CUDA
-
-template<typename T>
-class gmatrix : public matrix<T>
-{
-public:
-    // Constructor & Destructor
-    gmatrix(int x = DEFAULT_X, int y = DEFAULT_Y);
-    gmatrix(const gmatrix& b); // copy construct
-    gmatrix(gmatrix&& b); // move construct
-    gmatrix& operator=(const gmatrix& b); // copy assign
-    gmatrix& operator=(gmatrix&& b); // move assign
-    ~gmatrix();
-
-    // Data index
-    inline int index(int x, int y)
-    {
-        return x*matrix<T>::_x + y;
-    }
-
-    // Data Output & Input
-    void hTod();
-    void dToh();
-
-    // Calculate
-    gmatrix operator+(const gmatrix& b);
-    gmatrix operator*(const gmatrix& b);
-
-private:
-    T* _gpu_data;
-};
-
-#endif // GPU_CUDA
 
 #endif // !MATRIX_H

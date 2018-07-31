@@ -33,6 +33,7 @@ __global__ void mul_kernel(T* c, const T* a, const T* b, int xx, int extra, int 
     int tid_y = threadIdx.y;
     int x = blockDim.x * blockIdx.x + threadIdx.x;
     int y = blockDim.y * blockIdx.y + threadIdx.y;
+    //printf("%d %d\n", x, y);
     __shared__ T tile_a[TILE_WIDTH][TILE_WIDTH];
     __shared__ T tile_b[TILE_WIDTH][TILE_WIDTH];
     int tile_num = 1 + (extra + TILE_WIDTH - 1) / TILE_WIDTH;

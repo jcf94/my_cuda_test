@@ -8,19 +8,20 @@ PROG	: Main
 #include <stdio.h>
 #include <string.h>
 #include <algorithm>
-
-#include "matrix.h"
+#include <omp.h>
 
 #ifdef GPU_CUDA
 #include "cuda_test.h"
+#include "gmatrix.h"
+#else
+#include "matrix.h"
 #endif // GPU_CUDA
 
 using namespace std;
 
-#define LAX 1024
-#define LAY 1024
-#define LBX 1024
-#define LBY 1024
+#define LAX 10240
+#define LAB 10240
+#define LBY 10240
 
 int main()
 {
@@ -46,22 +47,31 @@ int main()
     printf("GPU Matrix Test\n");
 
     printf("---------------\n");
-    gmatrix<int> ga;
+    gmatrix<int> ga(LAX, LAB);
     ga.reset_num();
-    ga.display();
     ga.hTod();
 
-    printf("---------------\n");
-    gmatrix<int> gb;
+    gmatrix<int> gb(LAB, LBY);
     gb.reset_num();
-    gb.display();
     gb.hTod();
 
     printf("---------------\n");
     gmatrix<int> gc;
+    double start, end;
+    start = omp_get_wtime();
     gc = ga*gb;
+    end = omp_get_wtime();
+    printf("GPU cost: %.2lf ms.\n", end - start);
     gc.dToh();
-    gc.display();
+
+    printf("---------------\n");
+    gmatrix<int> gd;
+    matrix<int> d(LAB, LBY);
+    d.reset_num();
+    gd = ga*d;
+
+    if (gd.equal(gc)) printf("PASS\n");
+    else printf("ERROR!\n");
 
     #endif // GPU_CUDA
 
