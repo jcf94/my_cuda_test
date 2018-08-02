@@ -10,10 +10,10 @@ PROG	: CUDA_TEST
 
 #include "cuda_test.h"
 
-void check_device()
+int check_device()
 {
-    printf("Starting...\n\n");
-    printf(" CUDA Device Query (Runtime API) version (CUDART static linking)\n\n");
+    printf("=======================================\n");
+    printf("CUDA Device Query (Runtime API) version (CUDART static linking)\n\n");
 
     int deviceCount = 0;
     cudaError_t error_id = cudaGetDeviceCount(&deviceCount);
@@ -29,9 +29,12 @@ void check_device()
     if (deviceCount == 0)
     {
         printf("There are no available device(s) that support CUDA\n");
+        return 1;
     }
     else
     {
         printf("Detected %d CUDA Capable device(s)\n", deviceCount);
     }
+    printf("=======================================\n");
+    return 0;
 }

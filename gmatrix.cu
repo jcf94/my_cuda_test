@@ -11,10 +11,6 @@ PROG	: GMATRIX
 #include <cuda_runtime.h>
 #include <cuda.h>
 
-#include <iostream>
-using namespace std;
-
-
 #define check_cuda_rt(x) do { cudaError_t error__ = x; if (error__ != cudaSuccess) { printf("Code: %s, Description: %s", cudaGetErrorName(error__), cudaGetErrorString(error__)); exit(EXIT_FAILURE); } } while(false)
 
 #define ADDR(x) ((void**)&(x))
@@ -25,20 +21,14 @@ template<typename T>
 gmatrix<T>::gmatrix(int x, int y)
     : matrix<T>(x, y)
 {
-    printf("gmatrix Normal Construct\n");
-
-    int size = sizeof(T)*x*y;
-    printf("Size: %d\n", size);
-
-    check_cuda_rt(cudaMalloc(ADDR(_gpu_data), size));
-    printf("gpu_data: %p\n", _gpu_data);
-    printf("cpu_data: %p\n", matrix<T>::_data);
+    //printf("gmatrix Normal Construct\n");
+    check_cuda_rt(cudaMalloc(ADDR(_gpu_data), sizeof(T)*x*y));
 }
 
 template<typename T>
 gmatrix<T>::gmatrix(const gmatrix& b) // copy construct
 {
-    printf("Copy Construct\n");
+    //printf("Copy Construct\n");
 
     matrix<T>::_x = b._x;
     matrix<T>::_y = b._y;
@@ -53,7 +43,7 @@ gmatrix<T>::gmatrix(const gmatrix& b) // copy construct
 template<typename T>
 gmatrix<T>& gmatrix<T>::operator=(const gmatrix& b) // copy assign
 {
-    printf("Copy Assign\n");
+    //printf("Copy Assign\n");
 
     if (this != &b)
     {
@@ -111,10 +101,8 @@ gmatrix<T>& gmatrix<T>::operator=(gmatrix&& b) // move assign
 template<typename T>
 gmatrix<T>::~gmatrix()
 {
-    printf("Gmatrix Delete\n");
-    printf("gpu_data: %p\n", _gpu_data);
-    cout << cudaFree(_gpu_data) << endl;
-    printf("Gmatrix Delete Complete\n");
+    //printf("gmatrix Delete\n");
+    check_cuda_rt(cudaFree(_gpu_data));
 }
 
 template<typename T>
@@ -169,14 +157,13 @@ gmatrix<T> gmatrix<T>::operator*(matrix<T> b)
     }
 
     gmatrix<T> c(x(), b.y());
-
     for (int i=0;i<x();i++)
     #pragma omp parallel for
     for (int j=0;j<b.y();j++)
     {
         T temp = 0;
         for (int k=0;k<y();k++)
-        temp += data()[index(i, k)]*b[k][j];
+        temp += matrix<T>::_data[index(i, k)]*b[k][j];
         c[i][j] = temp;
     }
 
@@ -186,21 +173,16 @@ gmatrix<T> gmatrix<T>::operator*(matrix<T> b)
 template<typename T>
 void gmatrix<T>::hTod()
 {
-    printf("cudamemcpy\n");
-    int size = sizeof(T)*x()*y();
-    printf("Size: %d\n", size);
-    printf("gpu_data: %p\n", _gpu_data);
-    printf("cpu_data: %p\n", matrix<T>::_data);
-    check_cuda_rt(cudaMemcpy(_gpu_data, matrix<T>::_data,
-        size, cudaMemcpyHostToDevice));
-    printf("cudamemcpy_end\n");
+    check_cuda_rt(cudaMemcpy(_gpu_data, data(),
+        sizeof(T)*x()*y(),
+        cudaMemcpyHostToDevice));
 }
 
 template<typename T>
 void gmatrix<T>::dToh()
 {
-    check_cuda_rt(cudaMemcpy(matrix<T>::_data, _gpu_data,
-        sizeof(T)*matrix<T>::_x*matrix<T>::_y,
+    check_cuda_rt(cudaMemcpy(data(), _gpu_data,
+        sizeof(T)*x()*y(),
         cudaMemcpyDeviceToHost));
 }
 

@@ -23,9 +23,9 @@ public:
     ~matrix();
 
     // Data index
-    inline int index(int x, int y)
+    inline int index(int i, int j)
     {
-        return x*_x + y;
+        return i*_y + j;
     }
     inline int x()
     {

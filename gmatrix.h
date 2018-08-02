@@ -22,9 +22,9 @@ public:
     ~gmatrix();
 
     // Data index
-    inline int index(int x, int y)
+    inline int index(int i, int j)
     {
-        return x*matrix<T>::_x + y;
+        return i*matrix<T>::_y + j;
     }
     inline int x()
     {

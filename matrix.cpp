@@ -14,7 +14,7 @@ template<typename T>
 matrix<T>::matrix(int x, int y)
     : _x(x), _y(y)
 {
-    printf("Normal Construct\n");
+    //printf("Normal Construct\n");
     _data = (T*)malloc(sizeof(T)*x*y);
 }
 
@@ -76,8 +76,8 @@ matrix<T>& matrix<T>::operator=(matrix&& b) // move assign
 template<typename T>
 matrix<T>::~matrix()
 {
-    printf("Delete\n");
-    //free(_data);
+    //printf("Delete\n");
+    free(_data);
 }
 
 template<typename T>
@@ -151,13 +151,13 @@ matrix<T> matrix<T>::operator*(const matrix<T>& b)
 template<typename T>
 T* matrix<T>::operator[](int x)
 {
-    return &_data[x*_x];
+    return &_data[x*_y];
 }
 
 template<typename T>
 const T* matrix<T>::operator[](int x) const
 {
-    return &_data[x*_x];
+    return &_data[x*_y];
 }
 
 template class matrix<int>; // ! Important
