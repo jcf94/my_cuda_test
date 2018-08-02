@@ -12,7 +12,7 @@ PROG	: CUDA_TEST
 
 void check_device()
 {
-    printf("%s Starting...\n\n");
+    printf("Starting...\n\n");
     printf(" CUDA Device Query (Runtime API) version (CUDART static linking)\n\n");
 
     int deviceCount = 0;

@@ -7,8 +7,15 @@ PROG	: GMATRIX
 #include "gmatrix.h"
 
 #include <stdio.h>
+#include <string>
 #include <cuda_runtime.h>
 #include <cuda.h>
+
+#include <iostream>
+using namespace std;
+
+
+#define check_cuda_rt(x) do { cudaError_t error__ = x; if (error__ != cudaSuccess) { printf("Code: %s, Description: %s", cudaGetErrorName(error__), cudaGetErrorString(error__)); exit(EXIT_FAILURE); } } while(false)
 
 #define ADDR(x) ((void**)&(x))
 
@@ -18,25 +25,36 @@ template<typename T>
 gmatrix<T>::gmatrix(int x, int y)
     : matrix<T>(x, y)
 {
-    cudaMalloc(ADDR(_gpu_data), sizeof(T)*x*y);
+    printf("gmatrix Normal Construct\n");
+
+    int size = sizeof(T)*x*y;
+    printf("Size: %d\n", size);
+
+    check_cuda_rt(cudaMalloc(ADDR(_gpu_data), size));
+    printf("gpu_data: %p\n", _gpu_data);
+    printf("cpu_data: %p\n", matrix<T>::_data);
 }
 
 template<typename T>
 gmatrix<T>::gmatrix(const gmatrix& b) // copy construct
 {
+    printf("Copy Construct\n");
+
     matrix<T>::_x = b._x;
     matrix<T>::_y = b._y;
     matrix<T>::_data = new T[b._x*b._y];
     int data_size = sizeof(T)*x()*y();
     memcpy(data(), b._data, data_size);
 
-    cudaMalloc(ADDR(_gpu_data), data_size);
-    cudaMemcpy(_gpu_data, b._gpu_data, data_size, cudaMemcpyDeviceToDevice);
+    check_cuda_rt(cudaMalloc(ADDR(_gpu_data), data_size));
+    check_cuda_rt(cudaMemcpy(_gpu_data, b._gpu_data, data_size, cudaMemcpyDeviceToDevice));
 }
 
 template<typename T>
 gmatrix<T>& gmatrix<T>::operator=(const gmatrix& b) // copy assign
 {
+    printf("Copy Assign\n");
+
     if (this != &b)
     {
         int data_size = sizeof(T)*b._x*b._y;
@@ -46,11 +64,11 @@ gmatrix<T>& gmatrix<T>::operator=(const gmatrix& b) // copy assign
             matrix<T>::_y = b._y;
             delete[] matrix<T>::_data;
             matrix<T>::_data = new T[matrix<T>::_x*matrix<T>::_y];
-            cudaFree(_gpu_data);
-            cudaMalloc(ADDR(_gpu_data), data_size);
+            check_cuda_rt(cudaFree(_gpu_data));
+            check_cuda_rt(cudaMalloc(ADDR(_gpu_data), data_size));
         }
         memcpy(matrix<T>::_data, b._data, data_size);
-        cudaMemcpy(_gpu_data, b._gpu_data, data_size, cudaMemcpyDeviceToDevice);
+        check_cuda_rt(cudaMemcpy(_gpu_data, b._gpu_data, data_size, cudaMemcpyDeviceToDevice));
     }
     return *this;
 }
@@ -75,7 +93,7 @@ gmatrix<T>& gmatrix<T>::operator=(gmatrix&& b) // move assign
     if (this != &b)
     {
         delete[] matrix<T>::_data;
-        cudaFree(_gpu_data);
+        check_cuda_rt(cudaFree(_gpu_data));
 
         matrix<T>::_x = b._x;
         matrix<T>::_y = b._y;
@@ -93,7 +111,10 @@ gmatrix<T>& gmatrix<T>::operator=(gmatrix&& b) // move assign
 template<typename T>
 gmatrix<T>::~gmatrix()
 {
-    cudaFree(_gpu_data);
+    printf("Gmatrix Delete\n");
+    printf("gpu_data: %p\n", _gpu_data);
+    cout << cudaFree(_gpu_data) << endl;
+    printf("Gmatrix Delete Complete\n");
 }
 
 template<typename T>
@@ -165,17 +186,22 @@ gmatrix<T> gmatrix<T>::operator*(matrix<T> b)
 template<typename T>
 void gmatrix<T>::hTod()
 {
-    cudaMemcpy(_gpu_data, matrix<T>::_data,
-        sizeof(T)*matrix<T>::_x*matrix<T>::_y,
-        cudaMemcpyHostToDevice);
+    printf("cudamemcpy\n");
+    int size = sizeof(T)*x()*y();
+    printf("Size: %d\n", size);
+    printf("gpu_data: %p\n", _gpu_data);
+    printf("cpu_data: %p\n", matrix<T>::_data);
+    check_cuda_rt(cudaMemcpy(_gpu_data, matrix<T>::_data,
+        size, cudaMemcpyHostToDevice));
+    printf("cudamemcpy_end\n");
 }
 
 template<typename T>
 void gmatrix<T>::dToh()
 {
-    cudaMemcpy(matrix<T>::_data, _gpu_data,
+    check_cuda_rt(cudaMemcpy(matrix<T>::_data, _gpu_data,
         sizeof(T)*matrix<T>::_x*matrix<T>::_y,
-        cudaMemcpyDeviceToHost);
+        cudaMemcpyDeviceToHost));
 }
 
 template<typename T>

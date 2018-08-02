@@ -14,8 +14,8 @@ template<typename T>
 matrix<T>::matrix(int x, int y)
     : _x(x), _y(y)
 {
-    //printf("Normal Construct\n");
-    _data = new T[_x*_y];
+    printf("Normal Construct\n");
+    _data = (T*)malloc(sizeof(T)*x*y);
 }
 
 template<typename T>
@@ -36,8 +36,8 @@ matrix<T>& matrix<T>::operator=(const matrix& b) // copy assign
         {
             _x = b._x;
             _y = b._y;
-            delete[] _data;
-            _data = new T[_x*_y];
+            free(_data);
+            _data = (T*)malloc(sizeof(T)*_x*_y);
         }
         memcpy(_data, b._data, sizeof(T)*_x*_y);
     }
@@ -60,7 +60,7 @@ matrix<T>& matrix<T>::operator=(matrix&& b) // move assign
     //printf("Move Assign\n");
     if (this != &b)
     {
-        delete[] _data;
+        free(_data);
 
         _x = b._x;
         _y = b._y;
@@ -76,8 +76,8 @@ matrix<T>& matrix<T>::operator=(matrix&& b) // move assign
 template<typename T>
 matrix<T>::~matrix()
 {
-    //printf("Delete\n");
-    delete[] _data;
+    printf("Delete\n");
+    //free(_data);
 }
 
 template<typename T>
