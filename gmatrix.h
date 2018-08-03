@@ -22,19 +22,19 @@ public:
     ~gmatrix();
 
     // Data index
-    inline int index(int i, int j)
+    inline int index(int i, int j) const
     {
         return i*matrix<T>::_y + j;
     }
-    inline int x()
+    inline int x() const
     {
         return matrix<T>::_x;
     }
-    inline int y()
+    inline int y() const
     {
         return matrix<T>::_y;
     }
-    inline T* data()
+    inline T* data() const
     {
         return matrix<T>::_data;
     }
@@ -46,9 +46,9 @@ public:
     // Calculate
     gmatrix operator+(const gmatrix& b);
     gmatrix operator*(const gmatrix& b);
-    gmatrix operator*(matrix<T> b);
+    gmatrix operator*(const matrix<T>& b);
 
-    bool equal(gmatrix b);
+    bool equal(gmatrix b) const;
 
 private:
     T* _gpu_data;

@@ -20,7 +20,7 @@ PROG	: Main
 using namespace std;
 
 #define LAX 1024
-#define LAB 512
+#define LAB 2048
 #define LBY 1024
 
 int main()
@@ -74,8 +74,8 @@ int main()
     end = omp_get_wtime();
     printf("CPU cost: %.2lf ms.\n", (end - start) * 1000);
 
-    if (gd.equal(gc)) printf("PASS\n");
-    else printf("ERROR!\n");
+    if (gd.equal(gc)) printf("TEST PASS\n");
+    else printf("TEST ERROR!\n");
 
     #endif // GPU_CUDA
 

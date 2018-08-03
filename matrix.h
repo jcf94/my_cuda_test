@@ -23,23 +23,27 @@ public:
     ~matrix();
 
     // Data index
-    inline int index(int i, int j)
+    inline int index(int i, int j) const
     {
         return i*_y + j;
     }
-    inline int x()
+    inline int x() const
     {
         return _x;
     }
-    inline int y()
+    inline int y() const
     {
         return _y;
+    }
+    inline T* data() const
+    {
+        return _data;
     }
     T* operator[](int x);
     const T* operator[](int x) const;
 
     // Data Output & Input
-    void display();
+    void display() const;
     void reset(T value = 0);
     void reset_num();
 

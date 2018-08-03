@@ -20,10 +20,10 @@ matrix<T>::matrix(int x, int y)
 
 template<typename T>
 matrix<T>::matrix(const matrix& b) // copy construct
-    : _x(b._x), _y(b._y), _data(new T[b._x*b._y])
+    : _x(b._x), _y(b._y), _data((T*)malloc(sizeof(T)*b.x()*b.y()))
 {
     //printf("Copy Construct\n");
-    memcpy(_data, b._data, sizeof(T)*_x*_y);
+    memcpy(_data, b.data(), sizeof(T)*_x*_y);
 }
 
 template<typename T>
@@ -32,14 +32,14 @@ matrix<T>& matrix<T>::operator=(const matrix& b) // copy assign
     //printf("Copy Assign\n");
     if (this != &b)
     {
-        if (_x!=b._x || _y!=b._y)
+        if (_x!=b.x() || _y!=b.y())
         {
-            _x = b._x;
-            _y = b._y;
+            _x = b.x();
+            _y = b.y();
             free(_data);
             _data = (T*)malloc(sizeof(T)*_x*_y);
         }
-        memcpy(_data, b._data, sizeof(T)*_x*_y);
+        memcpy(_data, b.data(), sizeof(T)*_x*_y);
     }
     return *this;
 }
@@ -81,7 +81,7 @@ matrix<T>::~matrix()
 }
 
 template<typename T>
-void matrix<T>::display()
+void matrix<T>::display() const
 {
     for (int i=0;i<_x;i++)
     {
@@ -144,7 +144,6 @@ matrix<T> matrix<T>::operator*(const matrix<T>& b)
         c[i][j] = temp;
     }
 
-    //printf("--- Ready to exit ---\n");
     return c;
 }
 

@@ -32,9 +32,10 @@ gmatrix<T>::gmatrix(const gmatrix& b) // copy construct
 
     matrix<T>::_x = b._x;
     matrix<T>::_y = b._y;
-    matrix<T>::_data = new T[b._x*b._y];
     int data_size = sizeof(T)*x()*y();
-    memcpy(data(), b._data, data_size);
+
+    matrix<T>::_data = (T*)malloc(data_size);
+    memcpy(matrix<T>::_data, b.data(), data_size);
 
     check_cuda_rt(cudaMalloc(ADDR(_gpu_data), data_size));
     check_cuda_rt(cudaMemcpy(_gpu_data, b._gpu_data, data_size, cudaMemcpyDeviceToDevice));
@@ -52,8 +53,8 @@ gmatrix<T>& gmatrix<T>::operator=(const gmatrix& b) // copy assign
         {
             matrix<T>::_x = b._x;
             matrix<T>::_y = b._y;
-            delete[] matrix<T>::_data;
-            matrix<T>::_data = new T[matrix<T>::_x*matrix<T>::_y];
+            free(matrix<T>::_data);
+            matrix<T>::_data = (T*)malloc(data_size);
             check_cuda_rt(cudaFree(_gpu_data));
             check_cuda_rt(cudaMalloc(ADDR(_gpu_data), data_size));
         }
@@ -82,7 +83,7 @@ gmatrix<T>& gmatrix<T>::operator=(gmatrix&& b) // move assign
 {
     if (this != &b)
     {
-        delete[] matrix<T>::_data;
+        free(matrix<T>::_data);
         check_cuda_rt(cudaFree(_gpu_data));
 
         matrix<T>::_x = b._x;
@@ -148,7 +149,7 @@ gmatrix<T> gmatrix<T>::operator*(const gmatrix<T>& b)
 #include <omp.h>
 
 template<typename T>
-gmatrix<T> gmatrix<T>::operator*(matrix<T> b)
+gmatrix<T> gmatrix<T>::operator*(const matrix<T>& b)
 {
     if (y() != b.x())
     {
@@ -187,7 +188,7 @@ void gmatrix<T>::dToh()
 }
 
 template<typename T>
-bool gmatrix<T>::equal(gmatrix<T> b)
+bool gmatrix<T>::equal(gmatrix<T> b) const
 {
     if (x()!=b.x() || y()!=b.y()) return false;
     for (int i=0;i<x();i++)
